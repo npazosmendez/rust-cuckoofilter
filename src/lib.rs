@@ -28,7 +28,7 @@ extern crate serde;
 #[macro_use]
 extern crate serde_derive;
 
-use bucket::{Bucket, Fingerprint, BUCKET_SIZE, FINGERPRINT_SIZE};
+use bucket::{Bucket, Fingerprint, BUCKET_SIZE, FINGERPRINT_SIZE, EMPTY_FINGERPRINT_DATA};
 use util::{get_alt_index, get_fai, FaI};
 use rand::Rng;
 use std::iter::repeat;
@@ -238,6 +238,34 @@ where
         self.remove(fp, i1) || self.remove(fp, i2)
     }
 
+    pub fn clear(&mut self) {
+        for val in &mut *self.buckets {
+            *val = Bucket::EMPTY_BUCKET;
+        }
+        self.len = 0;
+    }
+
+    pub fn clear2(&mut self) {
+        for bucket in &mut *self.buckets {
+            bucket.clear();
+        }
+        self.len = 0;
+    }
+
+    pub fn clear3(&mut self) {
+        unsafe {
+            std::ptr::write_bytes(self.buckets.as_mut_ptr(), 100, self.buckets.len());
+        }
+        self.len = 0;
+    }
+
+    pub fn clear4(&mut self) {
+        for val in &mut *self.buckets {
+            *val = Bucket::new();
+        }
+        self.len = 0;
+    }
+
     /// Extracts fingerprint values from all buckets, used for exporting the filters data.
     fn values(&self) -> Vec<u8> {
         self.buckets
@@ -313,6 +341,34 @@ where
         ExportedCuckooFilter {
             values: cuckoo.values(),
             length: cuckoo.len(),
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test01() {
+        let mut cf = CuckooFilter::<DefaultHasher>::with_capacity(1_000_000);
+        let inserts = &vec!["ha", "he", "hi", "ho", "hu"];
+        for val in inserts {
+            assert!(cf.add(val).is_ok(), "{:?} insertion returns Ok", val);
+        }
+
+        for val in inserts {
+            assert!(cf.contains(val), "{:?} is contained", val);
+        }
+        assert!(!cf.contains("foo"));
+        assert!(!cf.is_empty());
+        assert_eq!(cf.len(), inserts.len());
+
+        cf.clear();
+        assert!(cf.is_empty());
+        assert_eq!(cf.len(), 0);
+        for val in inserts {
+            assert!(!cf.contains(val), "{:?} is not contained", val);
         }
     }
 }

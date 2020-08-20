@@ -68,3 +68,41 @@ fn bench_insertion_fnv(b: &mut test::Bencher) {
 fn bench_insertion_default(b: &mut test::Bencher) {
     perform_insertions::<std::collections::hash_map::DefaultHasher>(b);
 }
+
+#[bench]
+fn bench_new2(b: &mut test::Bencher) {
+    b.iter(|| {
+        test::black_box(CuckooFilter::<fnv::FnvHasher>::with_capacity(10_000_000));
+    });
+}
+
+#[bench]
+fn bench_clear(b: &mut test::Bencher) {
+    let mut cf = CuckooFilter::<fnv::FnvHasher>::with_capacity(10_000_000);
+    b.iter(|| {
+        test::black_box(cf.clear());
+    });
+}
+
+#[bench]
+fn bench_clear2(b: &mut test::Bencher) {
+    let mut cf = CuckooFilter::<fnv::FnvHasher>::with_capacity(10_000_000);
+    b.iter(|| {
+        test::black_box(cf.clear2());
+    });
+}
+
+#[bench]
+fn bench_clear3(b: &mut test::Bencher) {
+    let mut cf = CuckooFilter::<fnv::FnvHasher>::with_capacity(10_000_000);
+    b.iter(|| {
+        test::black_box(cf.clear3());
+    });
+}
+#[bench]
+fn bench_clear4(b: &mut test::Bencher) {
+    let mut cf = CuckooFilter::<fnv::FnvHasher>::with_capacity(10_000_000);
+    b.iter(|| {
+        test::black_box(cf.clear4());
+    });
+}

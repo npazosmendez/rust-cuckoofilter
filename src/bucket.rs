@@ -2,7 +2,7 @@ use std::convert::From;
 
 pub const FINGERPRINT_SIZE: usize = 1;
 pub const BUCKET_SIZE: usize = 4;
-const EMPTY_FINGERPRINT_DATA: [u8; FINGERPRINT_SIZE] = [100; FINGERPRINT_SIZE];
+pub const EMPTY_FINGERPRINT_DATA: [u8; FINGERPRINT_SIZE] = [100; FINGERPRINT_SIZE];
 
 // Fingerprint Size is 1 byte so lets remove the Vec
 #[derive(PartialEq, Copy, Clone, Hash)]
@@ -11,6 +11,8 @@ pub struct Fingerprint {
 }
 
 impl Fingerprint {
+    pub const EMPTY_FINGERPRINT : Fingerprint = Fingerprint::empty();
+
     /// Attempts to create a new Fingerprint based on the given
     /// number. If the created Fingerprint would be equal to the
     /// empty Fingerprint, None is returned.
@@ -24,7 +26,7 @@ impl Fingerprint {
     }
 
     /// Returns the empty Fingerprint.
-    pub fn empty() -> Fingerprint {
+    pub const fn empty() -> Fingerprint {
         Fingerprint {
             data: EMPTY_FINGERPRINT_DATA,
         }
@@ -48,11 +50,18 @@ pub struct Bucket {
 }
 
 impl Bucket {
+    pub const EMPTY_BUCKET : Bucket = Bucket::new();
+
     /// Creates a new bucket with a pre-allocated buffer.
-    pub fn new() -> Bucket {
+    pub const fn new() -> Bucket {
         Bucket {
-            buffer: [Fingerprint::empty(); BUCKET_SIZE],
+            buffer: [Fingerprint::EMPTY_FINGERPRINT; BUCKET_SIZE],
         }
+    }
+
+    /// TODO
+    pub fn clear(&mut self) {
+        self.buffer = [Fingerprint::EMPTY_FINGERPRINT; BUCKET_SIZE];
     }
 
     /// Inserts the fingerprint into the buffer if the buffer is not full.
